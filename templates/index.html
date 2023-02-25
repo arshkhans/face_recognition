@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Home Page</title>
+    </head>
+    <body>
+        <div>
+            <div class="flexbox-container" style="display:flex;">
+                <div class="sidebar" style="flex:1;">
+                    <form id="registerForm">
+                        <fieldset>
+                            <legend>Register:</legend>
+                            <label for="name">Name:</label><br>
+                            <input type="text" id="name" name="name"><br><br>
+                            <label for="email">Email:</label><br>
+                            <input type="email" id="email" name="email"><br><br>
+                            <label for="image">Upload Image:</label><br>
+                            <input type="file" id="image" name="image" accept="image/*"><br><br>
+                            <input type="submit" value="Submit">
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="main" style="flex:1;">
+                    <form id="recogniseForm">
+                        <fieldset>
+                            <legend>Recognise:</legend>
+                            <label for="email">Email:</label><br>
+                            <input type="email" id="email" name="email"><br><br>
+                            <label for="image">Upload Image:</label><br>
+                            <input type="file" id="image" name="image" accept="image/*" required><br><br>
+                            <input type="submit" value="Submit">
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center;font-size: x-large;" id="message">
+            ...
+        </div>
+        <style>
+            .block{
+                display:inline;
+                padding: 0.01em 16px;
+                border: 1px solid #ccc!important;
+            }
+            .del:hover {
+                background-color: grey;
+                cursor: pointer;
+            }
+        </style>
+        <div id="users">
+            <h2>Registered Users</h2>
+            {% for users in context %}
+                <div id="{{loop.index}}">
+                    <div class="block">
+                        {{users[0]}}
+                    </div>
+                    <div class="block">
+                        {{users[1]}}
+                    </div>
+                    <div class="block del" onclick='del("{{loop.index}}","{{users[1]}}")'>
+                        Delete
+                    </div>
+                    <br><br>
+                </div>
+            {% endfor %}
+        </div>
+
+        <script>
+            const message = document.getElementById("message")
+            const registerElem = document.getElementById("registerForm")
+            registerElem.onsubmit = async (e) => {
+                e.preventDefault();
+
+                let response = await fetch('/register', {
+                method: 'POST',
+                body: new FormData(registerElem)
+                });
+
+                if (await response.status == 200) {
+                    message.innerText = "Successfully Registered!";
+                } else {
+                    message.innerText = "Error!!!";
+                }
+
+            };
+
+            const recogniseElem = document.getElementById("recogniseForm")
+            recogniseElem.onsubmit = async (e) => {
+                e.preventDefault();
+
+                let response = await fetch('/recognise', {
+                method: 'POST',
+                body: new FormData(recogniseElem)
+                });
+                
+                if (await response.status == 200) {
+                    res = await response.json()
+                    message.innerText = res.message;
+                } else {
+                    message.innerText = "Error!!!";
+                }
+            };
+
+            async function del(id, mail) {
+                let block = document.getElementById(id);
+                let response = await fetch('/del/'+mail, {
+                method: 'POST',
+                });
+                if (await response.status == 200) {
+                    res = await response.json()
+                    message.innerText = res.message;
+                    block.remove();
+                } else {
+                    message.innerText = "Error!!!";
+                }
+            }
+        </script>
+    </body>
+</html>
